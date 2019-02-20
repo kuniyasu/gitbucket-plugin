@@ -57,26 +57,21 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author sogabe
  */
-//public class GitBucketPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
-public class GitBucketPushTrigger extends GitBucketTrigger {
+public class GitBucketPullrequestTrigger extends Trigger<AbstractProject<?, ?>> {
+
     private boolean passThroughGitCommit;
 
-    @DataBoundConstructor    
-    public GitBucketPushTrigger(boolean passThroughGitCommit) {
-    	super(passThroughGitCommit);
+    @DataBoundConstructor
+    public GitBucketPullrequestTrigger(boolean passThroughGitCommit) {
         this.passThroughGitCommit = passThroughGitCommit;
     }
 
-    @Override
     public boolean isPassThroughGitCommit() {
         return passThroughGitCommit;
     }
 
-    @Override
-    public void onPost( GitBucketRequest _req) {
-    	final GitBucketPushRequest req = (GitBucketPushRequest)_req;
-    	
+    public void onPost(final GitBucketPullrequestRequest req) {
         getDescriptor().queue.execute(new Runnable() {
             private boolean polling() {
                 try {
@@ -86,12 +81,9 @@ public class GitBucketPushTrigger extends GitBucketTrigger {
                         PrintStream logger = listener.getLogger();
 
                         long start = System.currentTimeMillis();
-                        logger.println("Started on "
-                                + DateFormat.getDateTimeInstance().format(new Date()));
-                        
+                        logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
                         boolean result = job.poll(listener).hasChanges();
-                        logger.println("Done. Took "
-                                + Util.getTimeSpanString(System.currentTimeMillis() - start));
+                        logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
 
                         if (result) {
                             logger.println("Changes found");
@@ -121,40 +113,46 @@ public class GitBucketPushTrigger extends GitBucketTrigger {
             @Override
             public void run() {
                 LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
+                
                 if (polling()) {
                     String name = " #" + job.getNextBuildNumber();
-                    GitBucketPushCause cause = createGitBucketPushCause(req);
+                    GitBucketPullrequsetCause cause = createGitBucketPullrequsetCause(req);
                     Action[] actions = createActions(req);
                     
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}",
-                                new String[]{job.getName(), name});
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.",
-                                job.getName());
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.", job.getName());
                     }
                 }
             }
 
-            private GitBucketPushCause createGitBucketPushCause(GitBucketPushRequest req) {
-                GitBucketPushCause cause;
-                String triggeredByUser = req.getPusher().getName();
+            private GitBucketPullrequsetCause createGitBucketPullrequsetCause(GitBucketPullrequestRequest req) {
+                GitBucketPullrequsetCause cause;
+                //String triggeredByUser = req.getPusher().getName();
+                
                 
                 try {
-                    cause = new GitBucketPushCause(triggeredByUser, getLogFile());
+        //            cause = new GitBucketPullrequsetCause(triggeredByUser, getLogFile());
+                    cause = new GitBucketPullrequsetCause("", getLogFile());
+                    
                 } catch (IOException ex) {
-                    cause = new GitBucketPushCause(triggeredByUser);
+                	cause = new GitBucketPullrequsetCause("");
+                    
+         //           cause = new GitBucketPullrequsetCause(triggeredByUser);
                 }
+               
                 
                 return cause;
             }
 
-            private Action[] createActions(GitBucketPushRequest req) {
+            private Action[] createActions(GitBucketPullrequestRequest req) {
                 List<Action> actions = new ArrayList<Action>();
 
+                
                 if (passThroughGitCommit) {
-                    Commit lastCommit = req.getLastCommit();
-                    actions.add(new RevisionParameterAction(lastCommit.getId(), false));
+                    //Commit lastCommit = req.getLastCommit();
+                    //actions.add(new RevisionParameterAction(lastCommit.getId(), false));
                 }
 
                 return actions.toArray(new Action[0]);
@@ -162,20 +160,20 @@ public class GitBucketPushTrigger extends GitBucketTrigger {
         });
     }
 
-    public static class GitBucketPushCause extends SCMTriggerCause {
+    public static class GitBucketPullrequsetCause extends SCMTriggerCause {
 
         private final String pushedBy;
 
-        public GitBucketPushCause(String pushedBy) {
+        public GitBucketPullrequsetCause(String pushedBy) {
             this(pushedBy, "");
         }
 
-        public GitBucketPushCause(String pushedBy, File logFile) throws IOException {
+        public GitBucketPullrequsetCause(String pushedBy, File logFile) throws IOException {
             super(logFile);
             this.pushedBy = pushedBy;
         }
 
-        public GitBucketPushCause(String pushedBy, String pollingLog) {
+        public GitBucketPullrequsetCause(String pushedBy, String pollingLog) {
             super(pollingLog);
             this.pushedBy = pushedBy;
         }

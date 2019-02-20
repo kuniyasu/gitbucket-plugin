@@ -78,26 +78,35 @@ public class GitBucketWebHook implements UnprotectedRootAction {
     public void doIndex(StaplerRequest req) {
         String event = req.getHeader("X-Github-Event");
         LOGGER.log(Level.FINE, "WebHook called. event: {0}", event);
-        if (!"push".equals(event)) {
-            LOGGER.log(Level.FINE, "Only push event can be accepted.");
+        
+        
+        if (!"push".equals(event) && !"pull_request".equals(event)) {
+            LOGGER.log(Level.FINE, "Only push and pull-request event can be accepted.");
             return;
         }
 
         String payload = req.getParameter("payload");
+
         if (payload == null) {
-            throw new IllegalArgumentException(
-                    "Not intended to be browsed interactively (must specify payload parameter)");
+            throw new IllegalArgumentException( "Not intended to be browsed interactively (must specify payload parameter)");
         }
 
-        processPayload(payload);
+        processPushPayload(payload);
     }
-
-    private void processPayload(String payload) {
+        
+    private void processPullRequestPayload(String payload) {
         JSONObject json = JSONObject.fromObject(payload);
         LOGGER.log(Level.FINE, "payload: {0}", json.toString(4));
 
-        GitBucketPushRequest req = GitBucketPushRequest.create(json);
+    }
+    
+    private void processPushPayload(String payload) {
+        JSONObject json = JSONObject.fromObject(payload);
+        LOGGER.log(Level.FINE, "payload: {0}", json.toString(4));
+
+        GitBucketRequest req = GitBucketPushRequest.create(json);
         String repositoryUrl = getRepositoryUrl(req);
+        
         if (repositoryUrl == null) {
             LOGGER.log(Level.WARNING, "No repository url found.");
             return;
@@ -108,10 +117,13 @@ public class GitBucketWebHook implements UnprotectedRootAction {
         try {
             for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
                 GitBucketPushTrigger trigger = job.getTrigger(GitBucketPushTrigger.class);
+                
                 if (trigger == null) {
                     continue;
                 }
+                
                 List<String> urls = RepositoryUrlCollector.collect(job);
+                
                 if (urls.contains(repositoryUrl.toLowerCase())) {
                     trigger.onPost(req);
                 }
@@ -121,7 +133,7 @@ public class GitBucketWebHook implements UnprotectedRootAction {
         }
     }
 
-    private String getRepositoryUrl(GitBucketPushRequest req) {
+    private String getRepositoryUrl(GitBucketRequest req) {
         // current gutbucket returns "clone_url", but old one returs "url",
         // so we check both for compatbility older than gitbucket 3.1
         String url = req.getRepository().getUrl();

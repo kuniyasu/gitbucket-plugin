@@ -37,38 +37,28 @@ import org.apache.commons.lang.builder.ToStringStyle;
  *
  * @author sogabe
  */
-public class GitBucketPushRequest extends GitBucketRequest{
 
-    private User pusher;
-
-    private String ref;
-
-    private List<Commit> commits;
-
+public class GitBucketPullrequestRequest {
+    private String action;
+    private int number;
+    
     private Repository repository;
     private Sender sender;
-    
-    public GitBucketPushRequest(){
-    	super();
-    }
-    
-    @Override
-    public static GitBucketRequest create(String payload) {    	
+
+    public static GitBucketPullrequestRequest create(String payload) {
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
-        
-        return GitBucketRequest.create(JSONObject.fromObject(payload));
+        return create(JSONObject.fromObject(payload));
     }
 
-    @Override
-    public static GitBucketRequest create(JSONObject payload) {
+    public static GitBucketPullrequestRequest create(JSONObject payload) {
         if (payload == null || payload.isNullObject()) {
             throw new IllegalArgumentException("payload should not be null");
         }
 
         JsonConfig config = createJsonConfig();
-        return (GitBucketPushRequest) JSONObject.toBean(payload, config);
+        return (GitBucketPullrequestRequest) JSONObject.toBean(payload, config);
     }
 
     private static JsonConfig createJsonConfig() {
@@ -76,11 +66,8 @@ public class GitBucketPushRequest extends GitBucketRequest{
         config.setRootClass(GitBucketPushRequest.class);
 
         Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
+        classMap.put("action", String.class);        
         classMap.put("sender", Sender.class);
-        classMap.put("commits", Commit.class);
-        classMap.put("added", String.class);
-        classMap.put("removed", String.class);
-        classMap.put("modified", String.class);
         config.setClassMap(classMap);
 
         config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
@@ -105,47 +92,35 @@ public class GitBucketPushRequest extends GitBucketRequest{
         return config;
     }
 
-    public GitBucketPushRequest() { }
-
-    public User getPusher() {
-        return pusher;
+    public GitBucketPullrequestRequest() {
     }
 
-    public void setPusher(User pusher) {
-        this.pusher = pusher;
-    }
 
-    public String getRef() {
-        return ref;
-    }
 
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
+    public String getAction() {
+		return action;
+	}
 
-    public List<Commit> getCommits() {
-        return commits;
-    }
-    
-    public Commit getLastCommit() {
-        if (commits.isEmpty()) {
-            return null;
-        }
-        return commits.get(commits.size() - 1);
-    }
+	public void setAction(String action) {
+		this.action = action;
+	}
 
-    public void setCommits(List<Commit> commits) {
-        this.commits = commits;
-    }
+	public int getNumber() {
+		return number;
+	}
 
-    public Repository getRepository() {
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
+	public Repository getRepository() {
         return repository;
     }
 
     public void setRepository(Repository repository) {
         this.repository = repository;
     }
-        
+    
     public Sender getSender() {
 		return sender;
 	}
@@ -325,7 +300,7 @@ public class GitBucketPushRequest extends GitBucketRequest{
         }
 
     }
-	*/
+    */
     
     /*
     public static class User {

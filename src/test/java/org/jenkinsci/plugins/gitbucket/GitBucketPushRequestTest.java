@@ -31,7 +31,8 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import org.jenkinsci.plugins.gitbucket.GitBucketPushRequest.User;
+// import org.jenkinsci.plugins.gitbucket.GitBucketPushRequest.User;
+
 import static org.junit.Assert.assertThat;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class GitBucketPushRequestTest {
 
     @Test()
     public void testCreate_String() {
-        GitBucketPushRequest req = GitBucketPushRequest.create(json);
+        GitBucketPushRequest req = (GitBucketPushRequest)GitBucketPushRequest.create(json);
         assertThat(req, notNullValue());
         
         User pusher = req.getPusher();
