@@ -45,23 +45,21 @@ public class GitBucketPushRequest extends GitBucketRequest{
 
     private List<Commit> commits;
 
-    private Repository repository;
-    private Sender sender;
+    //private Repository repository;
+    //private Sender sender;
     
     public GitBucketPushRequest(){
     	super();
     }
     
-    @Override
     public static GitBucketRequest create(String payload) {    	
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
         
-        return GitBucketRequest.create(JSONObject.fromObject(payload));
+        return GitBucketPushRequest.create(JSONObject.fromObject(payload));
     }
 
-    @Override
     public static GitBucketRequest create(JSONObject payload) {
         if (payload == null || payload.isNullObject()) {
             throw new IllegalArgumentException("payload should not be null");
@@ -105,7 +103,6 @@ public class GitBucketPushRequest extends GitBucketRequest{
         return config;
     }
 
-    public GitBucketPushRequest() { }
 
     public User getPusher() {
         return pusher;
@@ -138,6 +135,7 @@ public class GitBucketPushRequest extends GitBucketRequest{
         this.commits = commits;
     }
 
+    /*
     public Repository getRepository() {
         return repository;
     }
@@ -153,7 +151,8 @@ public class GitBucketPushRequest extends GitBucketRequest{
 	public void setSender(Sender sender) {
 		this.sender = sender;
 	}
-
+	*/
+    
 	@Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
