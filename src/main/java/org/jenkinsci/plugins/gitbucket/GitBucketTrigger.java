@@ -71,5 +71,21 @@ public class GitBucketTrigger extends Trigger<AbstractProject<?, ?>> {
     }
     
     public void onPost(GitBucketRequest req) {}
+ 
     
+    public static class GitBucketCause extends SCMTriggerCause {
+
+        public GitBucketCause(File logFile) throws IOException {
+            super(logFile);
+        }
+
+        public GitBucketCause(String pollingLog) {
+            super(pollingLog);
+        }
+
+        @Override
+        public String getShortDescription() {
+        	return "Started by GitBucket";
+        }
+    }
 }

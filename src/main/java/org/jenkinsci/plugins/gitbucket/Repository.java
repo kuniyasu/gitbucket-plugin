@@ -48,10 +48,9 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
         private boolean private_;
 
-        private User owner;
+        private Owner owner;
 
-        public Repository() {
-        }
+        public Repository() {}
 
         public String getName() {
             return name;
@@ -101,11 +100,11 @@ import org.apache.commons.lang.builder.ToStringStyle;
             this.private_ = private_;
         }
 
-        public User getOwner() {
+        public Owner getOwner() {
             return owner;
         }
 
-        public void setOwner(User owner) {
+        public void setOwner(Owner owner) {
             this.owner = owner;
         }
 

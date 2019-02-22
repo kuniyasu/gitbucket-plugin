@@ -38,12 +38,10 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * @author sogabe
  */
 
-public class GitBucketPullrequestRequest {
+public class GitBucketPullrequestRequest extends GitBucketRequest{
     private String action;
     private int number;
-    
-    private Repository repository;
-    private Sender sender;
+    private PullRequest pull_request;
 
     public static GitBucketPullrequestRequest create(String payload) {
         if (payload == null) {
@@ -67,7 +65,9 @@ public class GitBucketPullrequestRequest {
 
         Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
         classMap.put("action", String.class);        
+        classMap.put("pull_request", PullRequest.class);
         classMap.put("sender", Sender.class);
+        classMap.put("repository", Repository.class);
         config.setClassMap(classMap);
 
         config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
@@ -113,20 +113,13 @@ public class GitBucketPullrequestRequest {
 		this.number = number;
 	}
 
-	public Repository getRepository() {
-        return repository;
-    }
 
-    public void setRepository(Repository repository) {
-        this.repository = repository;
-    }
-    
-    public Sender getSender() {
-		return sender;
+	public PullRequest getPull_request() {
+		return pull_request;
 	}
 
-	public void setSender(Sender sender) {
-		this.sender = sender;
+	public void setPull_request(PullRequest pull_request) {
+		this.pull_request = pull_request;
 	}
 
 	@Override

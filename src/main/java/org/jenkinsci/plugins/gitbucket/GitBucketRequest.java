@@ -44,11 +44,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
+import net.sf.json.util.JavaIdentifierTransformer;
 
 import org.apache.commons.jelly.XMLOutput;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -68,9 +72,43 @@ public class GitBucketRequest {
 	}
 	
 	public static GitBucketRequest create(JSONObject payload) {
-		return null;		
+        if (payload == null || payload.isNullObject()) {
+            throw new IllegalArgumentException("payload should not be null");
+        }
+
+        JsonConfig config = createJsonConfig();
+        return (GitBucketRequest) JSONObject.toBean(payload, config);		
 	}
 
+    private static JsonConfig createJsonConfig() {
+        JsonConfig config = new JsonConfig();
+        config.setRootClass(GitBucketRequest.class);
+
+        Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
+        config.setClassMap(classMap);
+
+        config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
+
+            @Override
+            public String transformToJavaIdentifier(String param) {
+                if (param == null) {
+                    return null;
+                }
+                if ("private".equals(param)) {
+                    return "private_";
+                }
+                // TODO: can't we use JavaIdentifierTransformer.CAMEL_CASE ?
+                if("clone_url".equals(param)) {
+                  return "cloneUrl";
+                }
+                return param;
+            }
+
+        });
+
+        return config;
+    }
+    
 	public Repository getRepository() {
 		return repository;
 	}

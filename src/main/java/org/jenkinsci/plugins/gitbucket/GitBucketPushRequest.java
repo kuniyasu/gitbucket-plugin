@@ -39,7 +39,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  */
 public class GitBucketPushRequest extends GitBucketRequest{
 
-    private User pusher;
+    private Pusher pusher;
 
     private String ref;
 
@@ -52,7 +52,7 @@ public class GitBucketPushRequest extends GitBucketRequest{
     	super();
     }
     
-    public static GitBucketRequest create(String payload) {    	
+    public static GitBucketPushRequest create(String payload) {    	
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
@@ -60,25 +60,27 @@ public class GitBucketPushRequest extends GitBucketRequest{
         return GitBucketPushRequest.create(JSONObject.fromObject(payload));
     }
 
-    public static GitBucketRequest create(JSONObject payload) {
+    public static GitBucketPushRequest create(JSONObject payload) {
         if (payload == null || payload.isNullObject()) {
             throw new IllegalArgumentException("payload should not be null");
         }
-
         JsonConfig config = createJsonConfig();
         return (GitBucketPushRequest) JSONObject.toBean(payload, config);
     }
 
+    
+    
     private static JsonConfig createJsonConfig() {
         JsonConfig config = new JsonConfig();
         config.setRootClass(GitBucketPushRequest.class);
 
         Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
-        classMap.put("sender", Sender.class);
         classMap.put("commits", Commit.class);
         classMap.put("added", String.class);
         classMap.put("removed", String.class);
         classMap.put("modified", String.class);
+        classMap.put("sender", Sender.class);
+        classMap.put("repository", Repository.class);
         config.setClassMap(classMap);
 
         config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
@@ -104,11 +106,11 @@ public class GitBucketPushRequest extends GitBucketRequest{
     }
 
 
-    public User getPusher() {
+    public Pusher getPusher() {
         return pusher;
     }
 
-    public void setPusher(User pusher) {
+    public void setPusher(Pusher pusher) {
         this.pusher = pusher;
     }
 

@@ -71,7 +71,9 @@ public class GitBucketPullrequestTrigger extends Trigger<AbstractProject<?, ?>> 
         return passThroughGitCommit;
     }
 
-    public void onPost(final GitBucketPullrequestRequest req) {
+    public void onPost( GitBucketRequest _req) {
+    	final GitBucketPullrequestRequest req = (GitBucketPullrequestRequest)_req;
+    	
         getDescriptor().queue.execute(new Runnable() {
             private boolean polling() {
                 try {
@@ -134,7 +136,7 @@ public class GitBucketPullrequestTrigger extends Trigger<AbstractProject<?, ?>> 
                 
                 try {
         //            cause = new GitBucketPullrequsetCause(triggeredByUser, getLogFile());
-                    cause = new GitBucketPullrequsetCause("", getLogFile());
+                    cause = new GitBucketPullrequsetCause(getLogFile());
                     
                 } catch (IOException ex) {
                 	cause = new GitBucketPullrequsetCause("");
@@ -161,30 +163,18 @@ public class GitBucketPullrequestTrigger extends Trigger<AbstractProject<?, ?>> 
     }
 
     public static class GitBucketPullrequsetCause extends SCMTriggerCause {
-
-        private final String pushedBy;
-
-        public GitBucketPullrequsetCause(String pushedBy) {
-            this(pushedBy, "");
-        }
-
-        public GitBucketPullrequsetCause(String pushedBy, File logFile) throws IOException {
+        
+        public GitBucketPullrequsetCause(File logFile) throws IOException {
             super(logFile);
-            this.pushedBy = pushedBy;
         }
 
-        public GitBucketPullrequsetCause(String pushedBy, String pollingLog) {
+        public GitBucketPullrequsetCause(String pollingLog) {
             super(pollingLog);
-            this.pushedBy = pushedBy;
         }
 
         @Override
         public String getShortDescription() {
-            if (pushedBy == null) {
-                return "Started by GitBucket push";
-            } else {
-                return String.format("Started by GitBucket push by %s", pushedBy);
-            }
+        	return "Started by GitBucket pull request";
         }
     }
 

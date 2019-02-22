@@ -80,24 +80,62 @@ public class GitBucketWebHook implements UnprotectedRootAction {
         LOGGER.log(Level.FINE, "WebHook called. event: {0}", event);
         
         
-        if (!"push".equals(event) && !"pull_request".equals(event)) {
+        if ( "push".equals(event) ) {
+            String payload = req.getParameter("payload");
+
+            if (payload == null) {
+                throw new IllegalArgumentException( "Not intended to be browsed interactively (must specify payload parameter)");
+            }
+
+            processPushPayload(payload);
+        	
+        } else if ( "pull_request".equals(event) ) {
+            String payload = req.getParameter("payload");
+
+            if (payload == null) {
+                throw new IllegalArgumentException( "Not intended to be browsed interactively (must specify payload parameter)");
+            }
+
+            processPullRequestPayload(payload);
+        	        	
+        } else {
             LOGGER.log(Level.FINE, "Only push and pull-request event can be accepted.");
             return;
         }
 
-        String payload = req.getParameter("payload");
-
-        if (payload == null) {
-            throw new IllegalArgumentException( "Not intended to be browsed interactively (must specify payload parameter)");
-        }
-
-        processPushPayload(payload);
     }
         
     private void processPullRequestPayload(String payload) {
         JSONObject json = JSONObject.fromObject(payload);
         LOGGER.log(Level.FINE, "payload: {0}", json.toString(4));
 
+        GitBucketRequest req = GitBucketPullrequestRequest.create(json);
+        String repositoryUrl = getRepositoryUrl(req);
+        
+        if (repositoryUrl == null) {
+            LOGGER.log(Level.WARNING, "No repository url found.");
+            return;
+        }
+        
+        Authentication old = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+        try {
+            for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+            	GitBucketPullrequestTrigger trigger = job.getTrigger(GitBucketPullrequestTrigger.class);
+                
+                if (trigger == null) {
+                    continue;
+                }
+                
+                List<String> urls = RepositoryUrlCollector.collect(job);
+                
+                if (urls.contains(repositoryUrl.toLowerCase())) {
+                    trigger.onPost(req);
+                }
+            }
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(old);
+        }
     }
     
     private void processPushPayload(String payload) {

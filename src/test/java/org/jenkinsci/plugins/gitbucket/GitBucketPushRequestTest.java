@@ -67,7 +67,7 @@ public class GitBucketPushRequestTest {
         GitBucketPushRequest req = (GitBucketPushRequest)GitBucketPushRequest.create(json);
         assertThat(req, notNullValue());
         
-        User pusher = req.getPusher();
+        Pusher pusher = req.getPusher();
         assertThat(pusher, notNullValue());
         assertThat(pusher.getName(), is("sogabe"));
         assertThat(pusher.getEmail(), is("sogabe@xxx.ddo.jp"));
